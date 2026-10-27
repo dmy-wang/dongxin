@@ -53,6 +53,12 @@
 
 设置页：![设置](screenshots/settings.png)
 
+Windows / Web 版：
+
+| 简洁 | 鸡血 |
+|---|---|
+| ![web-simple](screenshots/web-simple.png) | ![web-hype](screenshots/web-hype.png) |
+
 ## 使用
 
 | 操作 | 效果 |

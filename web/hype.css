@@ -1,0 +1,610 @@
+/* ============================================================
+   动薪 · 鸡血模式
+   面板 448×322，内容区 ≈416×276（header 22 + 上下 padding 由 styles.css 提供）
+   ============================================================ */
+
+#view-hype { position: relative; }
+
+.hype-root {
+  --hx-gold: #ffc74d;
+  --hx-amber: #ff9e26;
+  --hx-pink: #ff6b8c;
+  --hx-cyan: #59d9fa;
+  --hx-green: #59f39e;
+  --hx-warm: #fff2cc;
+  --hx-text: rgba(255, 255, 255, 0.96);
+  --hx-dim: rgba(255, 255, 255, 0.55);
+  --hx-faint: rgba(255, 255, 255, 0.34);
+  --hx-stroke: rgba(255, 255, 255, 0.10);
+
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  isolation: isolate;
+  color: var(--hx-text);
+  font-family: var(--font);
+  -webkit-font-smoothing: antialiased;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 柔光背景：右上暖光 + 左下冷光 */
+.hype-root::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(300px 190px at 92% 0%, rgba(255, 158, 38, 0.13), transparent 72%),
+    radial-gradient(280px 190px at 4% 100%, rgba(89, 217, 250, 0.045), transparent 74%);
+}
+
+/* 内容层与画布层 */
+.hype-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  pointer-events: none;
+}
+
+.hype-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: block;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* ---------------- 顶部：状态胶囊 + 连击 ---------------- */
+
+.hype-top {
+  flex: 0 0 auto;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hype-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 23px;
+  padding: 0 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: inset 0 0 0 1px var(--hx-stroke);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--hx-dim);
+  letter-spacing: 0.2px;
+  white-space: nowrap;
+}
+
+.hype-dot {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 50%;
+  background: #7c8496;
+  box-shadow: 0 0 5px rgba(124, 132, 150, 0.55);
+  transition: background 0.25s ease, box-shadow 0.25s ease;
+}
+
+.hype-root[data-status="working"] .hype-dot {
+  background: var(--hx-green);
+  box-shadow: 0 0 7px rgba(89, 243, 158, 0.85);
+  animation: hx-dot-pulse 1.7s ease-in-out infinite;
+}
+.hype-root[data-status="lunch"] .hype-dot {
+  background: var(--hx-amber);
+  box-shadow: 0 0 7px rgba(255, 158, 38, 0.8);
+}
+.hype-root[data-status="before"] .hype-dot {
+  background: var(--hx-cyan);
+  box-shadow: 0 0 7px rgba(89, 217, 250, 0.8);
+}
+.hype-root[data-status="rest"] .hype-dot {
+  background: var(--hx-pink);
+  box-shadow: 0 0 7px rgba(255, 107, 140, 0.8);
+}
+.hype-root[data-status="after"] .hype-dot {
+  background: #7c8496;
+  box-shadow: 0 0 5px rgba(124, 132, 150, 0.5);
+}
+
+.hype-combo {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: rgba(255, 199, 77, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 77, 0.2);
+  font-size: 10.5px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.1px;
+  white-space: nowrap;
+  transition: background 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+}
+.hype-combo[hidden] { display: none; }
+.hype-combo-flame {
+  font-size: 10px;
+  line-height: 1;
+  filter: saturate(1.15) brightness(1.05);
+}
+.hype-combo-x {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.4);
+}
+.hype-combo-n {
+  font-size: 11.5px;
+  font-weight: 800;
+  color: rgba(255, 199, 77, 0.9);
+}
+.hype-combo.tier-1 {
+  color: rgba(255, 255, 255, 0.86);
+  background: rgba(255, 199, 77, 0.12);
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 77, 0.34), 0 0 10px rgba(255, 158, 38, 0.12);
+}
+.hype-combo.tier-1 .hype-combo-n { color: var(--hx-gold); }
+.hype-combo.tier-2 {
+  color: #fff7e3;
+  background: linear-gradient(100deg, rgba(255, 199, 77, 0.24), rgba(255, 107, 140, 0.2));
+  box-shadow: inset 0 0 0 1px rgba(255, 199, 77, 0.55), 0 0 14px rgba(255, 158, 38, 0.3);
+}
+.hype-combo.tier-2 .hype-combo-n { color: #ffe9a8; }
+
+/* ---------------- 大号金额区 ---------------- */
+
+.hype-main {
+  flex: 0 0 auto;
+  padding-top: 10px;
+}
+
+.hype-amount-wrap {
+  position: relative;
+  height: 60px;
+  display: flex;
+  align-items: center;
+}
+
+/* 金额背后的暖光晕 */
+.hype-amount-wrap::before {
+  content: "";
+  position: absolute;
+  left: -14px;
+  top: 50%;
+  width: 232px;
+  height: 78px;
+  transform: translateY(-50%);
+  pointer-events: none;
+  background: radial-gradient(closest-side, rgba(255, 158, 38, 0.15), rgba(255, 158, 38, 0) 72%);
+  filter: blur(2px);
+}
+
+.hype-amount {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system,
+    "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  font-size: 52px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.6px;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #ffe08a 0%, #ffc74d 32%, #ff9e26 68%, #ff6b3d 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 3px 10px rgba(255, 158, 38, 0.36));
+  transform-origin: left center;
+  will-change: transform;
+}
+.hype-amount.is-long { font-size: 46px; letter-spacing: -1.6px; }
+.hype-amount.is-xlong { font-size: 40px; letter-spacing: -1.8px; }
+
+.hype-root[data-active="0"] .hype-amount {
+  filter: drop-shadow(0 2px 9px rgba(255, 158, 38, 0.20));
+}
+
+.hype-amount.is-pop { animation: hx-amount-pop 0.42s cubic-bezier(0.22, 1.35, 0.36, 1) both; }
+.hype-amount.is-pop-strong { animation: hx-amount-pop-strong 0.58s cubic-bezier(0.22, 1.35, 0.36, 1) both; }
+
+@keyframes hx-amount-pop {
+  0% { transform: scale(1); }
+  22% { transform: scale(1.055); }
+  100% { transform: scale(1); }
+}
+@keyframes hx-amount-pop-strong {
+  0% { transform: scale(1); }
+  18% { transform: scale(1.10); }
+  48% { transform: scale(0.997); }
+  100% { transform: scale(1); }
+}
+
+/* 每秒 / 时 / 下一档 */
+.hype-meta {
+  height: 14px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--hx-dim);
+  letter-spacing: 0.15px;
+  white-space: nowrap;
+}
+.hype-meta b {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.64);
+}
+.hype-sep {
+  width: 1px;
+  height: 9px;
+  flex: 0 0 auto;
+  border-radius: 1px;
+  background: rgba(255, 255, 255, 0.22);
+}
+.hype-meta-spacer { flex: 1 1 auto; min-width: 6px; }
+.hype-meta-next b { color: rgba(255, 255, 255, 0.76); }
+
+/* 下一档细进度条 */
+.hype-mbar {
+  position: relative;
+  height: 4px;
+  margin-top: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+}
+.hype-mbar-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  min-width: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffc74d, #ff9e26 36%, #ff6b8c 72%, #59d9fa);
+  box-shadow: 0 0 7px rgba(255, 158, 38, 0.42);
+  transition: width 0.32s linear;
+}
+.hype-mbar-fill::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: var(--hx-warm);
+  box-shadow: 0 0 6px rgba(255, 242, 204, 0.9);
+  opacity: 0.9;
+}
+
+.hype-spacer { flex: 1 1 auto; min-height: 6px; }
+
+/* ---------------- 底部卡片 ---------------- */
+
+.hype-card {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 13px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.075), rgba(255, 255, 255, 0.035));
+  box-shadow: inset 0 0 0 1px var(--hx-stroke);
+  transition: box-shadow 0.3s ease;
+}
+.hype-root.is-danger .hype-card {
+  box-shadow: inset 0 0 0 1px rgba(255, 107, 140, 0.32), 0 0 24px rgba(255, 60, 90, 0.06);
+}
+
+.hype-card-top {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hype-cd-block { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.hype-label {
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 12px;
+  letter-spacing: 0.2px;
+  color: var(--hx-dim);
+  white-space: nowrap;
+}
+.hype-prog-block {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.hype-countdown {
+  font-family: var(--mono);
+  font-size: 27px;
+  font-weight: 800;
+  line-height: 30px;
+  letter-spacing: 0.2px;
+  color: var(--hx-text);
+  white-space: nowrap;
+}
+
+/* 最后 1 小时：红色脉冲 */
+.hype-root.is-danger .hype-countdown {
+  color: transparent;
+  background: linear-gradient(90deg, #ffa0b4 0%, #ff4d63 55%, #ff2233 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 7px rgba(255, 42, 66, 0.5));
+  animation: hx-countdown-pulse 1.5s ease-in-out infinite;
+}
+@keyframes hx-countdown-pulse {
+  0%, 100% {
+    filter: drop-shadow(0 0 5px rgba(255, 42, 66, 0.35));
+    opacity: 0.94;
+  }
+  50% {
+    filter: drop-shadow(0 0 14px rgba(255, 42, 66, 0.8));
+    opacity: 1;
+  }
+}
+
+.hype-pct {
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  font-family: var(--mono);
+  color: #fff;
+}
+.hype-pct-num {
+  font-size: 20px;
+  font-weight: 800;
+  line-height: 22px;
+  letter-spacing: -0.2px;
+}
+.hype-pct-sym {
+  margin-right: 3px;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.55);
+}
+.hype-arrow {
+  width: 12px;
+  height: 12px;
+  align-self: center;
+  fill: none;
+  stroke: var(--hx-green);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  filter: drop-shadow(0 0 4px rgba(89, 243, 158, 0.4));
+}
+.hype-root[data-active="0"] .hype-arrow {
+  stroke: rgba(255, 255, 255, 0.35);
+  filter: none;
+}
+
+/* 今日进度条：流光 + 端点脉冲 */
+.hype-progress {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+}
+.hype-progress-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: var(--p, 0%);
+  min-width: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #ffc74d, #ff9e26 35%, #ff6b8c 68%, #59d9fa);
+  box-shadow: 0 0 8px rgba(255, 158, 38, 0.35);
+  transition: width 0.35s linear;
+}
+.hype-progress-shine {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -46px;
+  width: 46px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: hx-shine 2.4s linear infinite;
+}
+@keyframes hx-shine {
+  from { transform: translateX(0); }
+  to { transform: translateX(460px); }
+}
+.hype-root[data-active="0"] .hype-progress-shine {
+  animation: none;
+  opacity: 0;
+}
+
+.hype-progress-knob {
+  position: absolute;
+  top: 50%;
+  left: max(0px, calc(var(--p, 0%) - 4px));
+  width: 8px;
+  height: 8px;
+  margin-top: -4px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.55);
+  transition: left 0.35s linear;
+}
+
+.hype-root.is-danger .hype-progress-fill {
+  background: linear-gradient(90deg, #ff6b8c, #ff3a52 55%, #ff2233);
+  box-shadow: 0 0 10px rgba(255, 42, 66, 0.45);
+}
+
+/* 卡片底部：励志语 + 今日档数 */
+.hype-card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 16px;
+  min-width: 0;
+}
+.hype-quote {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 14px;
+  color: var(--hx-dim);
+  white-space: nowrap;
+}
+.hype-quote[hidden] { display: none; }
+.hype-quote-text {
+  display: inline-block;
+  overflow: hidden;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  vertical-align: top;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.hype-quote.is-out .hype-quote-text {
+  opacity: 0;
+  transform: translateY(-5px);
+}
+.hype-chip {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(255, 199, 77, 0.10);
+  font-size: 9.5px;
+  font-weight: 600;
+  color: rgba(255, 199, 77, 0.9);
+  white-space: nowrap;
+}
+.hype-chip-star { font-size: 8.5px; }
+
+/* ---------------- 里程碑横幅 ---------------- */
+
+.hype-banner-wrap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 122px;
+  z-index: 6;
+  height: 38px;
+  padding-top: 2px;
+  display: flex;
+  justify-content: center;
+  pointer-events: none;
+}
+
+.hype-banner {
+  width: 100%;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 9px;
+  border-radius: 10px;
+  background: linear-gradient(100deg, rgba(58, 44, 20, 0.97), rgba(25, 25, 33, 0.97) 62%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 199, 77, 0.42),
+    0 8px 22px rgba(0, 0, 0, 0.4),
+    0 0 24px rgba(255, 158, 38, 0.10);
+  opacity: 0;
+  transform: translateY(10px) scale(0.94);
+  will-change: transform, opacity;
+}
+.hype-banner[hidden] { display: none; }
+.hype-banner.is-show {
+  animation: hx-banner 1.8s cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+@keyframes hx-banner {
+  0% { opacity: 0; transform: translateY(12px) scale(0.92); }
+  12% { opacity: 1; transform: translateY(0) scale(1.01); }
+  20% { opacity: 1; transform: translateY(0) scale(1); }
+  82% { opacity: 1; transform: translateY(0) scale(1); }
+  100% { opacity: 0; transform: translateY(-6px) scale(0.97); }
+}
+
+.hype-banner-icon {
+  flex: 0 0 auto;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: rgba(255, 199, 77, 0.16);
+  font-size: 10px;
+  color: var(--hx-gold);
+}
+.hype-banner-title {
+  flex: 0 0 auto;
+  font-size: 12.5px;
+  font-weight: 800;
+  color: var(--hx-text);
+  white-space: nowrap;
+}
+.hype-banner-dot {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.38);
+}
+.hype-banner-sub {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--hx-dim);
+}
+.hype-banner-spacer { flex: 1 1 auto; }
+.hype-banner-tag {
+  flex: 0 0 auto;
+  padding: 2.5px 6px;
+  border-radius: 999px;
+  background: rgba(255, 199, 77, 0.14);
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: var(--hx-gold);
+  white-space: nowrap;
+}
+
+@keyframes hx-dot-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hype-progress-shine,
+  .hype-root[data-status="working"] .hype-dot,
+  .hype-root.is-danger .hype-countdown { animation: none; }
+}

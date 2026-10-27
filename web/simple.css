@@ -1,0 +1,254 @@
+/* 动薪 · 简洁模式（Web / Electron）
+   内容区约 316 × 162；面板整体 348 × 208。布局对齐 macOS 版 SimpleView。 */
+
+.simple-root {
+  --phase-color: #59f39e;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+  width: 100%;
+  padding-top: 2px;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.simple-root[data-phase="earning"]    { --phase-color: #59f39e; }
+.simple-root[data-phase="lunch"]      { --phase-color: #ff9e26; }
+.simple-root[data-phase="beforeWork"] { --phase-color: #59d9fa; }
+.simple-root[data-phase="afterWork"]  { --phase-color: #ffc74d; }
+.simple-root[data-phase="restDay"]    { --phase-color: #b3a8ff; }
+
+/* ── 顶部：状态胶囊 + 今日 + ─────────────────────────────── */
+
+.simple-status-row {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 20px;
+  margin-bottom: 9px;
+}
+
+.simple-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 20px;
+  padding: 0 8px;
+  border-radius: 999px;
+  color: var(--phase-color);
+  background: rgba(255, 255, 255, 0.06);
+  background: color-mix(in srgb, var(--phase-color) 10%, transparent);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.10);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--phase-color) 22%, transparent);
+  transition: color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.simple-pill-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--phase-color);
+  flex: 0 0 auto;
+}
+
+.simple-root[data-phase="earning"] .simple-pill-dot {
+  box-shadow: 0 0 5px rgba(89, 243, 158, 0.8);
+  box-shadow: 0 0 5px color-mix(in srgb, var(--phase-color) 80%, transparent);
+}
+
+.simple-pill-text {
+  font-size: 10.5px;
+  font-weight: 500;
+  letter-spacing: .2px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.simple-today {
+  margin-left: auto;
+  font-size: 9.5px;
+  font-weight: 500;
+  letter-spacing: 1.4px;
+  color: rgba(255, 255, 255, 0.30);
+  line-height: 1;
+  white-space: nowrap;
+}
+
+/* ── 大号金额 ─────────────────────────────────────────────── */
+
+.simple-amount {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 1px;
+  height: 46px;
+  max-width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1;
+}
+
+.simple-prefix {
+  font-size: 21px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.48);
+  transform: translateY(-1px);
+}
+
+.simple-prefix.is-empty { display: none; }
+
+.simple-whole {
+  font-size: 42px;
+  font-weight: 700;
+  letter-spacing: -0.4px;
+  color: #fff;
+  background: linear-gradient(180deg, #ffffff 0%, rgba(255, 255, 255, 0.74) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 2px 9px rgba(89, 243, 158, 0.14));
+}
+
+.simple-decimals {
+  font-size: 21px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.46);
+  transform: translateY(-1px);
+}
+
+/* ── 速率行：每秒 / 每小时 ────────────────────────────────── */
+
+.simple-rate {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 14px;
+  margin-top: 4px;
+  font-size: 10.5px;
+  line-height: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.simple-rate-label {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.36);
+}
+
+.simple-rate-value {
+  font-family: "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.62);
+  letter-spacing: -0.1px;
+}
+
+.simple-rate-sep {
+  font-size: 10.5px;
+  color: rgba(255, 255, 255, 0.22);
+}
+
+/* ── 弹性空隙 ─────────────────────────────────────────────── */
+
+.simple-gap { flex: 1 1 auto; min-height: 0; }
+
+/* ── 细进度条 ─────────────────────────────────────────────── */
+
+.simple-progress-row {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  height: 12px;
+}
+
+.simple-bar {
+  position: relative;
+  flex: 1 1 auto;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+
+.simple-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #59f39e 0%, #59d9fa 100%);
+  box-shadow: 0 0 6px rgba(89, 243, 158, 0.4);
+  transition: width .3s ease-out;
+  will-change: width;
+}
+
+.simple-pct {
+  flex: 0 0 auto;
+  width: 34px;
+  text-align: right;
+  font-family: "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.47);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+/* ── 底部：倒计时 / 星期 ──────────────────────────────────── */
+
+.simple-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  height: 16px;
+  margin-top: 19px;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.simple-footer-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 10px;
+  height: 10px;
+  flex: 0 0 auto;
+  color: var(--phase-color);
+  opacity: .85;
+}
+
+.simple-footer-leading {
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: .1px;
+  color: rgba(255, 255, 255, 0.72);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.simple-footer-trailing {
+  margin-left: auto;
+  padding-left: 6px;
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.38);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simple-bar-fill { transition: none; }
+}
