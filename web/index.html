@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>动薪 DongXin</title>
+<link rel="icon" href="assets/icon.png" />
+<link rel="stylesheet" href="styles.css" />
+<link rel="stylesheet" href="simple.css" />
+<link rel="stylesheet" href="hype.css" />
+<link rel="stylesheet" href="settings.css" />
+</head>
+<body>
+<div id="app">
+  <main id="panel" class="panel">
+    <header id="chrome" class="chrome">
+      <span id="mode-label" class="mode-label">简洁模式</span>
+      <span class="chrome-spacer"></span>
+      <button id="btn-mode" class="hud-btn" title="切换模式" aria-label="切换模式">⚡</button>
+      <button id="btn-settings" class="hud-btn" title="设置" aria-label="设置">⚙</button>
+      <button id="btn-hide" class="hud-btn" title="隐藏" aria-label="隐藏">✕</button>
+    </header>
+
+    <section id="view-simple" class="view"></section>
+    <section id="view-hype" class="view" hidden></section>
+  </main>
+
+  <div id="settings-overlay" class="settings-overlay" hidden></div>
+  <div id="settings-window" class="settings-window" hidden></div>
+</div>
+<script src="engine.js"></script>
+<script src="simple.js"></script>
+<script src="hype.js"></script>
+<script src="settings.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

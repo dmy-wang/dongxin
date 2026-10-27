@@ -10,3 +10,12 @@ preview/
 
 # 图标中间产物（可由 tools_make_icon.py 重新生成）
 assets/AppIcon.iconset/
+
+# Node / Electron
+node_modules/
+desktop/release/
+desktop/package-lock.json
+# 截图工具临时产物
+tools/shotter/*.png
+
+desktop/web/

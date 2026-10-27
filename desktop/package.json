@@ -1,0 +1,47 @@
+{
+  "name": "dongxin-desktop",
+  "version": "1.0.0",
+  "description": "动薪 DongXin · 实时入账桌面小工具",
+  "main": "main.js",
+  "author": "Shaoru Wang",
+  "license": "MIT",
+  "scripts": {
+    "start": "node sync-web.js && electron .",
+    "dev": "node sync-web.js && electron . --dev",
+    "dist:win": "node sync-web.js && electron-builder --win nsis portable",
+    "dist:mac": "node sync-web.js && electron-builder --mac dmg"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0"
+  },
+  "build": {
+    "appId": "com.dachongzi.dongxin",
+    "productName": "DongXin",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "sync-web.js",
+      "web/**/*"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "icon": "build/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    },
+    "mac": {
+      "target": "dmg",
+      "category": "public.app-category.productivity"
+    }
+  }
+}

@@ -1,0 +1,84 @@
+:root {
+  --bg-top: #12141c;
+  --bg-bottom: #1c1f2b;
+  --stroke: rgba(255, 255, 255, 0.10);
+  --text: rgba(255, 255, 255, 0.96);
+  --text-dim: rgba(255, 255, 255, 0.55);
+  --text-faint: rgba(255, 255, 255, 0.34);
+  --gold: #ffc74d;
+  --amber: #ff9e26;
+  --green: #59f39e;
+  --cyan: #59d9fa;
+  --pink: #ff6b8c;
+  --dot: #8b93a7;
+  --radius: 18px;
+  --font: -apple-system, "SF Pro Text", "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  --mono: "SF Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; -webkit-user-select: none; user-select: none; }
+html, body {
+  margin: 0; height: 100%;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--font);
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+/* 浏览器里直接打开时给个深色底，Electron 里 body 透明 */
+body.browser { background: #0b0c11; display: grid; place-items: center; }
+#app { width: 100%; height: 100%; display: grid; place-items: center; }
+
+.panel {
+  position: relative;
+  width: 348px; height: 208px;
+  border-radius: var(--radius);
+  background: linear-gradient(180deg, var(--bg-top), var(--bg-bottom));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.55), inset 0 0 0 1px var(--stroke);
+  padding: 10px 16px 14px;
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  -webkit-app-region: drag;
+  transition: width .18s ease, height .18s ease;
+}
+.panel.hype { width: 448px; height: 322px; }
+.panel.hype::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: radial-gradient(420px 300px at 90% 0%, rgba(255, 158, 38, 0.16), transparent 70%);
+}
+.panel.hidden { opacity: 0; pointer-events: none; transform: scale(.96); }
+
+.chrome {
+  display: flex; align-items: center; gap: 6px;
+  height: 22px; opacity: 0; transition: opacity .16s ease;
+  -webkit-app-region: no-drag;
+}
+.panel:hover .chrome { opacity: 1; }
+.mode-label { font-size: 10px; color: var(--text-dim); letter-spacing: .2px; }
+.chrome-spacer { flex: 1; }
+.hud-btn {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 0; background: rgba(255, 255, 255, 0.06);
+  color: var(--text-dim); font-size: 11px; line-height: 1;
+  display: grid; place-items: center; cursor: pointer;
+  -webkit-app-region: no-drag;
+  transition: background .15s ease, color .15s ease;
+}
+.hud-btn:hover { background: rgba(255, 255, 255, 0.14); color: #fff; }
+
+.view { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+.view[hidden] { display: none; }
+
+/* 设置窗口（覆盖层） */
+.settings-overlay {
+  position: fixed; inset: 0; background: rgba(4, 5, 8, 0.55);
+  backdrop-filter: blur(2px); z-index: 20;
+}
+.settings-overlay[hidden] { display: none; }
+.settings-window {
+  position: fixed; z-index: 21;
+  width: 520px; height: 660px; max-height: 88vh;
+  border-radius: 16px; overflow: hidden;
+  background: linear-gradient(180deg, #14161f, #1b1e29);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.7), inset 0 0 0 1px var(--stroke);
+}
+.settings-window[hidden] { display: none; }
