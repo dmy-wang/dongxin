@@ -3,15 +3,7 @@ name: Windows Build
 on:
   push:
     branches: [main]
-    paths:
-      - 'desktop/**'
-      - 'web/**'
-      - '.github/workflows/windows.yml'
-  push:
-    tags: ['v*']
   workflow_dispatch:
-  release:
-    types: [published]
 
 permissions:
   contents: write
@@ -21,31 +13,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-
       - name: Install dependencies
         working-directory: desktop
         run: npm install --no-audit --no-fund
-
       - name: Build Windows installer (NSIS + portable)
         working-directory: desktop
         run: npm run dist:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: DongXin-Windows
-          path: |
-            desktop/release/*.exe
+          path: desktop/release/*.exe
           if-no-files-found: error
-
-      - name: Attach to release (tags / release)
-        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: desktop/release/*.exe
