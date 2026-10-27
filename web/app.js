@@ -61,6 +61,22 @@ function buildState() {
   };
 }
 
+const PANEL_SIZE = { simple: [348, 208], hype: [448, 322] };
+function syncWindowSize(size) {
+  if (!isElectron) return;
+  const [w, h] = size || PANEL_SIZE[config.displayMode] || PANEL_SIZE.simple;
+  window.dongxin.resize(w, h);
+}
+function openSettingsUI() {
+  settingsOpen = true; overlay.hidden = false; settingsRoot.hidden = false;
+  syncWindowSize([560, 700]);
+  settings.update(buildState());
+}
+function closeSettingsUI() {
+  settingsOpen = false; overlay.hidden = true; settingsRoot.hidden = true;
+  syncWindowSize();
+}
+
 function render(force = false) {
   const state = buildState();
   const isHype = config.displayMode === 'hype';
@@ -69,6 +85,7 @@ function render(force = false) {
   viewHype.hidden = !isHype;
   modeLabel.textContent = isHype ? '鸡血模式' : '简洁模式';
   if (isHype) hype.update(state); else simple.update(state);
+  if (!settingsOpen && force) syncWindowSize();
   if (settingsOpen) settings.update(state);
   if (isElectron) window.dongxin.setTrayTitle(E.fmt.amount(state.snap.earnedToday, state.prefix, 2));
   if (force) document.documentElement.style.setProperty('--mode', isHype ? 'hype' : 'simple');
@@ -92,17 +109,14 @@ document.getElementById('btn-mode').onclick = () => {
   config = { ...config, displayMode: config.displayMode === 'hype' ? 'simple' : 'hype' };
   E.saveConfig(localStorage, config); render(true);
 };
-document.getElementById('btn-settings').onclick = () => {
-  settingsOpen = true; overlay.hidden = false; settingsRoot.hidden = false;
-  settings.update(buildState());
-};
+document.getElementById('btn-settings').onclick = () => openSettingsUI();
 document.getElementById('btn-hide').onclick = () => {
   if (isElectron) window.dongxin.hide();
   else panel.style.display = 'none';
 };
-overlay.onclick = () => { settingsOpen = false; overlay.hidden = true; settingsRoot.hidden = true; };
+overlay.onclick = () => closeSettingsUI();
 window.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && settingsOpen) { settingsOpen = false; overlay.hidden = true; settingsRoot.hidden = true; }
+  if (e.key === 'Escape' && settingsOpen) { closeSettingsUI(); }
   if ((e.metaKey || e.ctrlKey) && e.key === ',') { document.getElementById('btn-settings').click(); }
 });
 

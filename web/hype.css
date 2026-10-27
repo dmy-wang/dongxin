@@ -37,7 +37,7 @@
   z-index: 0;
   pointer-events: none;
   background:
-    radial-gradient(300px 190px at 92% 0%, rgba(255, 158, 38, 0.13), transparent 72%),
+    radial-gradient(300px 190px at 92% 0%, rgba(255, 158, 38, 0.085), transparent 72%),
     radial-gradient(280px 190px at 4% 100%, rgba(89, 217, 250, 0.045), transparent 74%);
 }
 
@@ -189,7 +189,7 @@
   height: 78px;
   transform: translateY(-50%);
   pointer-events: none;
-  background: radial-gradient(closest-side, rgba(255, 158, 38, 0.15), rgba(255, 158, 38, 0) 72%);
+  background: radial-gradient(closest-side, rgba(255, 158, 38, 0.12), rgba(255, 158, 38, 0) 72%);
   filter: blur(2px);
 }
 
@@ -197,28 +197,29 @@
   position: relative;
   display: inline-block;
   max-width: 100%;
-  font-family: ui-rounded, "SF Pro Rounded", "SF Pro Display", -apple-system,
-    "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
+  font-family: ui-rounded, "SF Pro Rounded", "Arial Rounded MT Bold", "SF Pro Display",
+    -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", system-ui, sans-serif;
   font-size: 52px;
   font-weight: 800;
   line-height: 1;
-  letter-spacing: -0.6px;
+  letter-spacing: -0.5px;
   white-space: nowrap;
   background: linear-gradient(135deg, #ffe08a 0%, #ffc74d 32%, #ff9e26 68%, #ff6b3d 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 3px 10px rgba(255, 158, 38, 0.36));
+  filter: drop-shadow(0 2px 8px rgba(255, 150, 30, 0.38)) drop-shadow(0 0 20px rgba(255, 110, 20, 0.16));
   transform-origin: left center;
   will-change: transform;
 }
-.hype-amount.is-long { font-size: 46px; letter-spacing: -1.6px; }
+.hype-amount.is-long { font-size: 46px; letter-spacing: -1.2px; }
 .hype-amount.is-xlong { font-size: 40px; letter-spacing: -1.8px; }
 
 .hype-root[data-active="0"] .hype-amount {
-  filter: drop-shadow(0 2px 9px rgba(255, 158, 38, 0.20));
+  filter: drop-shadow(0 2px 9px rgba(255, 158, 38, 0.16));
 }
+.hype-root[data-active="0"] .hype-amount-wrap::before { opacity: 0.45; }
 
 .hype-amount.is-pop { animation: hx-amount-pop 0.42s cubic-bezier(0.22, 1.35, 0.36, 1) both; }
 .hype-amount.is-pop-strong { animation: hx-amount-pop-strong 0.58s cubic-bezier(0.22, 1.35, 0.36, 1) both; }
@@ -238,6 +239,7 @@
 /* 每秒 / 时 / 下一档 */
 .hype-meta {
   height: 14px;
+  margin-top: 2px;
   display: flex;
   align-items: center;
   gap: 7px;
@@ -494,6 +496,7 @@
 }
 .hype-chip {
   flex: 0 0 auto;
+  margin-left: auto;
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -513,7 +516,7 @@
   position: absolute;
   left: 0;
   right: 0;
-  top: 122px;
+  top: 121px;
   z-index: 6;
   height: 38px;
   padding-top: 2px;

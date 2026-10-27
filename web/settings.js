@@ -469,7 +469,8 @@ function mountSettings(root, api) {
       api.resetToday();
       showToast("已重置今日进度");
     } else if (action === "defaults") {
-      api.patchConfig(Object.assign({}, DEFAULTS));
+      // 契约：恢复默认直接补丁 window.DX.DEFAULTS
+      api.patchConfig(window.DX && window.DX.DEFAULTS ? window.DX.DEFAULTS : DEFAULTS);
       sync(currentState());
       showToast("已恢复默认设置");
     } else if (action === "close") {
