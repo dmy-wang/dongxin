@@ -28,6 +28,7 @@ if (params.get('now')) {
 const demoSalary = params.get('salary');
 if (params.get('mode') === 'hype' || params.get('mode') === 'simple') config.displayMode = params.get('mode');
 if (demoSalary) config.monthlySalary = Number(demoSalary);
+if (params.get('zoom')) config.zoom = Math.min(2, Math.max(0.7, Number(params.get('zoom'))));
 const now = () => demoNow || new Date();
 let combo = 0;
 let coinPulse = 0;
@@ -62,10 +63,15 @@ function buildState() {
 }
 
 const PANEL_SIZE = { simple: [348, 208], hype: [448, 322] };
+function panelZoom() { return Math.min(2, Math.max(0.7, Number(config.zoom) || 1)); }
 function syncWindowSize(size) {
   if (!isElectron) return;
-  const [w, h] = size || PANEL_SIZE[config.displayMode] || PANEL_SIZE.simple;
-  window.dongxin.resize(w, h);
+  const [bw, bh] = size || PANEL_SIZE[config.displayMode] || PANEL_SIZE.simple;
+  const z = panelZoom();
+  window.dongxin.resize(Math.round(bw * z), Math.round(bh * z));
+}
+function applyZoom() {
+  panel.style.zoom = String(panelZoom());
 }
 function openSettingsUI() {
   settingsOpen = true; overlay.hidden = false; settingsRoot.hidden = false;
@@ -86,6 +92,7 @@ function render(force = false) {
   modeLabel.textContent = isHype ? '鸡血模式' : '简洁模式';
   if (isHype) hype.update(state); else simple.update(state);
   if (!settingsOpen && force) syncWindowSize();
+  applyZoom();
   if (settingsOpen) settings.update(state);
   if (isElectron) window.dongxin.setTrayTitle(E.fmt.amount(state.snap.earnedToday, state.prefix, 2));
   if (force) document.documentElement.style.setProperty('--mode', isHype ? 'hype' : 'simple');
@@ -115,7 +122,15 @@ document.getElementById('btn-hide').onclick = () => {
   else panel.style.display = 'none';
 };
 overlay.onclick = () => closeSettingsUI();
+function setZoom(z) {
+  config = { ...config, zoom: Math.min(2, Math.max(0.7, z)) };
+  E.saveConfig(localStorage, config);
+  render(true);
+}
 window.addEventListener('keydown', (e) => {
+  if ((e.metaKey || e.ctrlKey) && (e.key === '+' || e.key === '=')) { e.preventDefault(); setZoom(panelZoom() + 0.1); return; }
+  if ((e.metaKey || e.ctrlKey) && e.key === '-') { e.preventDefault(); setZoom(panelZoom() - 0.1); return; }
+  if ((e.metaKey || e.ctrlKey) && e.key === '0') { e.preventDefault(); setZoom(1); return; }
   if (e.key === 'Escape' && settingsOpen) { closeSettingsUI(); }
   if ((e.metaKey || e.ctrlKey) && e.key === ',') { document.getElementById('btn-settings').click(); }
 });

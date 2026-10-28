@@ -206,6 +206,11 @@ function mountSettings(root, api) {
             '<input class="st-range" type="range" data-range="hypeIntensity" min="0.5" max="1.6" step="0.05" />' +
             '<span class="st-mono st-mono-sm" data-ref="intensityValue">1.00×</span>' +
           "</div>" +
+          '<div class="st-row">' +
+            '<span class="st-label">界面缩放</span>' +
+            '<input class="st-range" type="range" data-range="zoom" min="0.7" max="2" step="0.05" />' +
+            '<span class="st-mono st-mono-sm" data-ref="zoomValue">100%</span>' +
+          "</div>" +
           '<div class="st-toggle-grid">' +
             toggleRow("菜单栏显示金额", "showTrayAmount") +
             toggleRow("启动时显示面板", "showOnLaunch") +
@@ -395,6 +400,12 @@ function mountSettings(root, api) {
       if (refs.intensityRange.value !== val) refs.intensityRange.value = val;
     }
     refs.intensityValue.textContent = (Number(cfg.hypeIntensity) || 1).toFixed(2) + "×";
+    if (refs.zoomValue) {
+      const z = Math.min(2, Math.max(0.7, Number(cfg.zoom) || 1));
+      refs.zoomValue.textContent = Math.round(z * 100) + "%";
+      const zr = root.querySelector('[data-range="zoom"]');
+      if (zr && zr.value !== String(z)) zr.value = String(z);
+    }
     refs.intensityRow.classList.toggle("is-dim", cfg.displayMode !== "hype");
     allToggles.forEach(function (input) {
       const val = !!cfg[input.dataset.bool];

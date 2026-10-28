@@ -17,6 +17,7 @@ const DEFAULTS = {
   hypeIntensity: 1,
   soundEnabled: false,
   showOnLaunch: true,
+  zoom: 1,
   workweek: [1, 2, 3, 4, 5],  // JS getDay(): 0=周日 … 6=周六
 };
 
