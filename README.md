@@ -7,14 +7,6 @@
 
 ---
 
-## 三个版本
-
-| 平台 | 形态 | 说明 |
-|---|---|---|
-| **macOS** | 原生 SwiftUI 菜单栏 App（2.2 MB） | 仓库主版本，`./build.sh` 构建 |
-| **Windows** | Electron 桌面浮窗（置顶/无边框/托盘） | `desktop/`，安装包由 GitHub Actions 在 `windows-latest` 构建，见 [Actions](https://github.com/dmy-wang/dongxin/actions/workflows/windows.yml) 产物 `DongXin-Windows` |
-| **Web** | 单页应用，浏览器直接打开 | `web/index.html`，也部署在 GitHub Pages |
-
 ## 两种模式
 
 | | 简洁模式 | 鸡血模式 |
@@ -53,12 +45,6 @@
 
 设置页：![设置](screenshots/settings.png)
 
-Windows / Web 版：
-
-| 简洁 | 鸡血 |
-|---|---|
-| ![web-simple](screenshots/web-simple.png) | ![web-hype](screenshots/web-hype.png) |
-
 ## 使用
 
 | 操作 | 效果 |
@@ -66,8 +52,17 @@ Windows / Web 版：
 | 左键点菜单栏金额 | 显示/隐藏浮窗 |
 | 右键点菜单栏金额 | 菜单：模式切换、设置、重置今日、开机自启、退出 |
 | 拖拽浮窗 | 移动位置（自动记住） |
+| **⌘ + / ⌘ - / ⌘ 0** | 放大 / 缩小 / 恢复 100%（0.7×–2.0×） |
+| **触控板双指捏合** | 在浮窗上捏合连续缩放 |
+| **拖浮窗右下角小圆点** | 拖拽自由缩放，双击回 100% |
+| 设置 → 显示 → 界面缩放 | 滑杆 + 一键 100% |
 | 鼠标悬停浮窗 | 右上角出现 切换模式 / 设置 / 隐藏 按钮 |
 | ⌘, | 打开设置（菜单在菜单栏右键里） |
+
+## 缩放（0.7×–2.0×）
+
+浮窗不是固定尺寸：`⌘+ / ⌘- / ⌘0`、触控板捏合、拖右下角圆点都能随便放大缩小（默认 100%，范围 70%–200%），
+尺寸按比例缩放且文字保持清晰；设置里也有滑杆。缩放值会记住。
 
 ## 隐私说明
 
@@ -84,31 +79,6 @@ Windows / Web 版：
 
 默认：月薪 15000、21.75 天、9:00–18:00、午休 12:00–13:00 →
 `15000 ÷ 21.75 ÷ 28800 ≈ 0.0240 元/秒 ≈ 86.2 元/时`。
-
-## Windows / Web 构建
-
-```bash
-# Windows 安装包（在 Windows 上执行，或交给 CI）
-cd desktop
-npm install
-npm run dist:win      # 输出 desktop/release/DongXin Setup *.exe + portable
-
-# 本地起 Electron 调试
-npm start
-
-# 纯网页版：直接双击 web/index.html（无需构建）
-```
-
-Windows 版特性与 macOS 一致：无边框置顶浮窗、托盘图标与菜单、简洁/鸡血双模式、隐私前缀、本地存储配置。
-CI 会在每次推送 `web/` 或 `desktop/` 时自动构建，产物在 Actions 页面可下载。
-
-开发期截图（macOS 本地，用 DSH 自带 Electron）：
-
-```bash
-E="$HOME/.dsh/electron/Electron.app/Contents/MacOS/Electron"
-env -u ELECTRON_RUN_AS_NODE SHOT_OUT=/tmp/shot.png SHOT_QUERY="mode=hype&salary=15000&now=15:00" \
-  SHOT_W=520 SHOT_H=380 "$E" --no-sandbox tools/shotter
-```
 
 ## 从源码构建
 

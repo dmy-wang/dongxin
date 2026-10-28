@@ -114,6 +114,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         menu.addItem(.separator())
         menu.addItem(withTitle: "设置…", action: #selector(openSettings), keyEquivalent: ",").target = self
         menu.addItem(withTitle: "重置今日进度", action: #selector(resetToday), keyEquivalent: "").target = self
+        menu.addItem(.separator())
+        let zi = NSMenuItem(title: "放大", action: #selector(zoomIn), keyEquivalent: "+")
+        zi.target = self; zi.keyEquivalentModifierMask = [.command]
+        menu.addItem(zi)
+        let zo = NSMenuItem(title: "缩小", action: #selector(zoomOut), keyEquivalent: "-")
+        zo.target = self; zo.keyEquivalentModifierMask = [.command]
+        menu.addItem(zo)
+        let zr = NSMenuItem(title: "实际大小", action: #selector(zoomReset), keyEquivalent: "0")
+        zr.target = self; zr.keyEquivalentModifierMask = [.command]
+        menu.addItem(zr)
         let launch = NSMenuItem(title: "开机自启", action: #selector(toggleLaunchAtLogin), keyEquivalent: "")
         launch.target = self
         launch.state = AppModel.isLaunchAtLoginEnabled ? .on : .off
@@ -129,6 +139,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         model.config.displayMode = sender.tag == 0 ? .simple : .hype
     }
     @objc private func resetToday() { model.resetTodayProgress() }
+    @objc private func zoomIn() { zoom(by: 0.1) }
+    @objc private func zoomOut() { zoom(by: -0.1) }
+    @objc private func zoomReset() { setZoom(1.0) }
     @objc private func toggleLaunchAtLogin() {
         AppModel.setLaunchAtLogin(!AppModel.isLaunchAtLoginEnabled)
     }
@@ -154,7 +167,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let root = RootView(model: model,
                             onSettings: { [weak self] in self?.openSettings() },
                             onHide: { [weak self] in self?.hidePanel() },
-                            onToggleMode: { [weak self] in self?.toggleMode() })
+                            onToggleMode: { [weak self] in self?.toggleMode() },
+                            onZoom: { [weak self] delta in self?.zoom(by: delta) },
+                            onZoomTo: { [weak self] value in self?.setZoom(value) })
         panel.contentView = NSHostingView(rootView: root)
         lastMode = model.config.displayMode
 
@@ -169,7 +184,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
 
     private func panelSize(for mode: DisplayMode) -> NSSize {
-        mode == .simple ? NSSize(width: 348, height: 208) : NSSize(width: 448, height: 322)
+        let z = model?.config.clampedZoom ?? 1.0
+        let base = mode == .simple ? NSSize(width: 348, height: 208) : NSSize(width: 448, height: 322)
+        return NSSize(width: (base.width * z).rounded(), height: (base.height * z).rounded())
     }
 
     private func positionDefault() {
@@ -196,6 +213,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     }
     @objc func toggleMode() {
         model.config.displayMode = model.config.displayMode == .simple ? .hype : .simple
+    }
+
+    func zoom(by delta: CGFloat) {
+        let base = model.config.clampedZoom
+        setZoom(base + Double(delta))
+    }
+
+    func setZoom(_ value: Double) {
+        model.config.zoom = min(2.0, max(0.7, value))
     }
 
     private func applyConfig() {
@@ -252,11 +278,30 @@ struct RootView: View {
     var onSettings: () -> Void
     var onHide: () -> Void
     var onToggleMode: () -> Void
+    var onZoom: (CGFloat) -> Void
+    var onZoomTo: (Double) -> Void
+
     @State private var hovering = false
+    @State private var pinchBase: Double? = nil
+    @State private var dragBase: Double? = nil
 
     private var isHype: Bool { model.config.displayMode == .hype }
+    private var baseSize: CGSize { isHype ? CGSize(width: 448, height: 322) : CGSize(width: 348, height: 208) }
+    private var zoom: Double { model.config.clampedZoom }
 
     var body: some View {
+        content
+            .frame(width: baseSize.width, height: baseSize.height)
+            .scaleEffect(zoom, anchor: .topLeading)
+            .frame(width: baseSize.width * zoom, height: baseSize.height * zoom, alignment: .topLeading)
+            .overlay(alignment: .bottomTrailing) { resizeHandle }
+            .gesture(pinchGesture)
+            .onHover { hovering = $0 }
+            .animation(.easeInOut(duration: 0.16), value: hovering)
+            .animation(.easeOut(duration: 0.12), value: zoom)
+    }
+
+    private var content: some View {
         ZStack(alignment: .topLeading) {
             PanelBackground(hype: isHype)
             VStack(spacing: 0) {
@@ -274,9 +319,40 @@ struct RootView: View {
             .padding(.top, 10)
             .padding(.bottom, 14)
         }
-        .frame(width: isHype ? 448 : 348, height: isHype ? 322 : 208)
-        .onHover { hovering = $0 }
-        .animation(.easeInOut(duration: 0.18), value: hovering)
+        .frame(width: baseSize.width, height: baseSize.height)
+    }
+
+    /// 触控板双指捏合缩放
+    private var pinchGesture: some Gesture {
+        MagnifyGesture(minimumScaleDelta: 0.01)
+            .onChanged { value in
+                if pinchBase == nil { pinchBase = zoom }
+                onZoomTo((pinchBase ?? 1) * value.magnification)
+            }
+            .onEnded { _ in pinchBase = nil }
+    }
+
+    /// 右下角拖拽缩放（拖出 1px ≈ 0.16%）；双击恢复 100%
+    private var resizeHandle: some View {
+        Circle()
+            .fill(Color.white.opacity(hovering ? 0.22 : 0.001))
+            .frame(width: 11, height: 11)
+            .padding(5)
+            .contentShape(Rectangle())
+            .onHover { inside in
+                if inside { NSCursor.crosshair.push() } else { NSCursor.pop() }
+            }
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        if dragBase == nil { dragBase = zoom }
+                        let d = Double(value.translation.width + value.translation.height) / 620.0
+                        onZoomTo((dragBase ?? 1) + d)
+                    }
+                    .onEnded { _ in dragBase = nil }
+            )
+            .onTapGesture(count: 2) { onZoomTo(1.0) }
+            .help("拖拽缩放，双击恢复 100%")
     }
 
     private var header: some View {

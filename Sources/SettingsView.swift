@@ -365,7 +365,7 @@ struct SettingsView: View {
     // MARK: - 显示
 
     private var displaySection: some View {
-        SettingsCard(title: "显示", systemImage: "paintbrush") {
+        SettingsCard(title: "显示", systemImage: "paintbrush", subtitle: "缩放也可在浮窗右下角拖拽 / 触控板捏合 / ⌘+ ⌘-") {
             VStack(spacing: 10) {
                 HStack(spacing: 10) {
                     Text("显示模式")
@@ -394,6 +394,26 @@ struct SettingsView: View {
                         .frame(width: 44, alignment: .trailing)
                 }
                 .opacity(config.displayMode == .hype ? 1 : 0.5)
+
+                HStack(spacing: 10) {
+                    Text("界面缩放")
+                        .font(.system(size: 12.5))
+                        .foregroundStyle(Theme.textPrimary)
+                    Slider(value: Binding(
+                        get: { model.config.zoom },
+                        set: { model.config.zoom = min(2.0, max(0.7, $0)) }
+                    ), in: 0.7...2.0, step: 0.05)
+                        .tint(Theme.cyan)
+                    Text(String(format: "%.0f%%", model.config.zoom * 100))
+                        .font(Theme.mono(11, weight: .semibold))
+                        .monospacedDigit()
+                        .foregroundStyle(Theme.textSecondary)
+                        .frame(width: 44, alignment: .trailing)
+                    Button("100%") { model.config.zoom = 1.0 }
+                        .buttonStyle(.plain)
+                        .font(.system(size: 10.5))
+                        .foregroundStyle(Theme.textSecondary)
+                }
 
                 HStack(spacing: 14) {
                     toggleRow("菜单栏显示金额", isOn: $model.config.showMenuBarAmount)
@@ -722,11 +742,13 @@ struct SettingsView: View {
 private struct SettingsCard<Content: View>: View {
     let title: String
     let systemImage: String
+    let subtitle: String?
     let content: Content
 
-    init(title: String, systemImage: String = "", @ViewBuilder content: () -> Content) {
+    init(title: String, systemImage: String = "", subtitle: String? = nil, @ViewBuilder content: () -> Content) {
         self.title = title
         self.systemImage = systemImage
+        self.subtitle = subtitle
         self.content = content()
     }
 
@@ -742,6 +764,12 @@ private struct SettingsCard<Content: View>: View {
                     .font(.system(size: 11, weight: .semibold))
                     .tracking(0.8)
                     .foregroundStyle(Theme.textSecondary)
+                if let subtitle {
+                    Text(subtitle)
+                        .font(.system(size: 9.5))
+                        .foregroundStyle(Theme.textSecondary.opacity(0.5))
+                        .lineLimit(1)
+                }
                 Spacer(minLength: 0)
             }
             content

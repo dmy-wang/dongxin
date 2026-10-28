@@ -4,6 +4,8 @@ import SwiftUI
 // MARK: - 持久化
 
 enum Store {
+    /// 截图/渲染模式置 true：只读配置，不回写 UserDefaults
+    static var isEphemeral = false
     private static let key = "xintiao.config.v1"
     static func load() -> SalaryConfig {
         guard let data = UserDefaults.standard.data(forKey: key),
@@ -13,6 +15,7 @@ enum Store {
         return cfg
     }
     static func save(_ cfg: SalaryConfig) {
+        if isEphemeral { return }
         if let data = try? JSONEncoder().encode(cfg) {
             UserDefaults.standard.set(data, forKey: key)
         }

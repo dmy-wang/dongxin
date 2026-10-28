@@ -7,12 +7,17 @@ import AppKit
 @MainActor
 enum Renderer {
     static func run(mode: String, out: String) -> Int32 {
+        Store.isEphemeral = true
         let model = AppModel()
-        if let idx = CommandLine.arguments.firstIndex(of: "--render"),
-           CommandLine.arguments.count > idx + 3,
-           let salary = Double(CommandLine.arguments[idx + 3]) {
-            model.config.monthlySalary = salary
+        if let idx = CommandLine.arguments.firstIndex(of: "--render") {
+            if CommandLine.arguments.count > idx + 3, let salary = Double(CommandLine.arguments[idx + 3]) {
+                model.config.monthlySalary = salary
+            }
+            if CommandLine.arguments.count > idx + 4, let z = Double(CommandLine.arguments[idx + 4]) {
+                model.config.zoom = min(2.0, max(0.7, z))
+            }
         }
+        let zoom = model.config.clampedZoom
         model.refresh()
         let isHype = (mode == "hype")
         let isSettings = (mode == "settings")
@@ -37,7 +42,10 @@ enum Renderer {
             )
         }
 
-        let renderer = ImageRenderer(content: content)
+        let rendered = content
+            .scaleEffect(zoom, anchor: .topLeading)
+            .frame(width: w * zoom, height: h * zoom, alignment: .topLeading)
+        let renderer = ImageRenderer(content: rendered)
         renderer.scale = 2
         guard let cg = renderer.cgImage else {
             FileHandle.standardError.write("render failed\n".data(using: .utf8)!)
@@ -61,13 +69,16 @@ enum Renderer {
 @MainActor
 enum WindowRenderer {
     static func run(mode: String, out: String, salary: Double?) -> Int32 {
+        Store.isEphemeral = true
         let model = AppModel()
         if let salary { model.config.monthlySalary = salary }
         model.refresh()
         let isHype = (mode == "hype")
         let isSettings = (mode == "settings")
-        let size = isSettings ? NSSize(width: 520, height: 660)
+        let zoom = model.config.clampedZoom
+        let base = isSettings ? NSSize(width: 520, height: 660)
                               : (isHype ? NSSize(width: 448, height: 322) : NSSize(width: 348, height: 208))
+        let size = NSSize(width: (base.width * zoom).rounded(), height: (base.height * zoom).rounded())
 
         let root: AnyView
         if isSettings {

@@ -46,6 +46,8 @@ struct SalaryConfig: Codable, Equatable {
     var hypeIntensity: Double = 1.0   // 0.5 温和 / 1.0 标准 / 1.6 狂暴
     var soundEnabled: Bool = false
     var showPanelOnLaunch: Bool = true
+    /// 界面缩放倍数（0.7–2.0），支持 ⌘+/⌘-/⌘0、触控板捏合、右下角拖拽
+    var zoom: Double = 1.0
     /// Calendar weekday: 1=周日 ... 7=周六
     var workweek: Set<Int> = [2, 3, 4, 5, 6]
 
@@ -61,6 +63,8 @@ struct SalaryConfig: Codable, Equatable {
     var startDateComponents: DateComponents { DateComponents(hour: startHour, minute: startMinute) }
     var endDateComponents: DateComponents { DateComponents(hour: endHour, minute: endMinute) }
     var lunchStartComponents: DateComponents { DateComponents(hour: lunchStartHour, minute: lunchStartMinute) }
+    var clampedZoom: Double { min(2.0, max(0.7, zoom)) }
+
     var dailyWorkSeconds: Double {
         let total = TimeInterval((endHour * 60 + endMinute) - (startHour * 60 + startMinute)) * 60
         return max(60, total - Double(lunchMinutes) * 60)
