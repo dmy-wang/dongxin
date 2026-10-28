@@ -6,8 +6,14 @@ ROOT="$(cd "$(dirname "$0")" && pwd)"
 SRC="$ROOT/Sources"; OUT="${BUILD_DIR:-$ROOT/build}"
 APP_NAME="${APP_NAME:-动薪}"
 APP="$OUT/$APP_NAME.app"
-FE=/Library/Developer/CommandLineTools/usr/bin/swift-frontend
-SDK=/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk
+FE="${SWIFT_FRONTEND:-}"
+SDK="${MACOS_SDK:-}"
+if [ -z "$FE" ] && command -v xcrun >/dev/null 2>&1; then
+  FE="$(xcrun -f swift-frontend 2>/dev/null || true)"
+  SDK="$(xcrun --show-sdk-path 2>/dev/null || true)"
+fi
+FE="${FE:-/Library/Developer/CommandLineTools/usr/bin/swift-frontend}"
+SDK="${SDK:-/Library/Developer/CommandLineTools/SDKs/MacOSX.sdk}"
 TARGET=arm64-apple-macos14.0
 rm -rf "$OUT/obj" "$APP"
 mkdir -p "$OUT/obj" "$OUT/tmp" "$OUT/cmc" "$OUT/smc" "$APP/Contents/MacOS" "$APP/Contents/Resources"
