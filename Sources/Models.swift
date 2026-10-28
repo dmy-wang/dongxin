@@ -71,6 +71,45 @@ struct SalaryConfig: Codable, Equatable {
     }
 }
 
+// MARK: - 兼容解码（旧版本配置缺字段时用默认值，避免整份配置被重置）
+
+extension SalaryConfig {
+    enum CodingKeys: String, CodingKey {
+        case monthlySalary, workdayMode, manualWorkdays
+        case startHour, startMinute, endHour, endMinute
+        case lunchStartHour, lunchStartMinute, lunchMinutes
+        case currency, symbolStyle, displayMode
+        case showMenuBarAmount, motivationalEnabled, hypeIntensity, soundEnabled
+        case showPanelOnLaunch, zoom, workweek
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        let d = SalaryConfig()
+        self.init()
+        monthlySalary = try c.decodeIfPresent(Double.self, forKey: .monthlySalary) ?? d.monthlySalary
+        workdayMode = try c.decodeIfPresent(WorkdayMode.self, forKey: .workdayMode) ?? d.workdayMode
+        manualWorkdays = try c.decodeIfPresent(Double.self, forKey: .manualWorkdays) ?? d.manualWorkdays
+        startHour = try c.decodeIfPresent(Int.self, forKey: .startHour) ?? d.startHour
+        startMinute = try c.decodeIfPresent(Int.self, forKey: .startMinute) ?? d.startMinute
+        endHour = try c.decodeIfPresent(Int.self, forKey: .endHour) ?? d.endHour
+        endMinute = try c.decodeIfPresent(Int.self, forKey: .endMinute) ?? d.endMinute
+        lunchStartHour = try c.decodeIfPresent(Int.self, forKey: .lunchStartHour) ?? d.lunchStartHour
+        lunchStartMinute = try c.decodeIfPresent(Int.self, forKey: .lunchStartMinute) ?? d.lunchStartMinute
+        lunchMinutes = try c.decodeIfPresent(Int.self, forKey: .lunchMinutes) ?? d.lunchMinutes
+        currency = try c.decodeIfPresent(String.self, forKey: .currency) ?? d.currency
+        symbolStyle = try c.decodeIfPresent(SymbolStyle.self, forKey: .symbolStyle) ?? d.symbolStyle
+        displayMode = try c.decodeIfPresent(DisplayMode.self, forKey: .displayMode) ?? d.displayMode
+        showMenuBarAmount = try c.decodeIfPresent(Bool.self, forKey: .showMenuBarAmount) ?? d.showMenuBarAmount
+        motivationalEnabled = try c.decodeIfPresent(Bool.self, forKey: .motivationalEnabled) ?? d.motivationalEnabled
+        hypeIntensity = try c.decodeIfPresent(Double.self, forKey: .hypeIntensity) ?? d.hypeIntensity
+        soundEnabled = try c.decodeIfPresent(Bool.self, forKey: .soundEnabled) ?? d.soundEnabled
+        showPanelOnLaunch = try c.decodeIfPresent(Bool.self, forKey: .showPanelOnLaunch) ?? d.showPanelOnLaunch
+        zoom = try c.decodeIfPresent(Double.self, forKey: .zoom) ?? d.zoom
+        workweek = try c.decodeIfPresent(Set<Int>.self, forKey: .workweek) ?? d.workweek
+    }
+}
+
 // MARK: - 快照
 
 struct SalarySnapshot: Equatable {

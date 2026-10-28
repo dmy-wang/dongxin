@@ -8,16 +8,26 @@ enum Store {
     static var isEphemeral = false
     private static let key = "xintiao.config.v1"
     static func load() -> SalaryConfig {
-        guard let data = UserDefaults.standard.data(forKey: key),
-              let cfg = try? JSONDecoder().decode(SalaryConfig.self, from: data) else {
+        guard let data = UserDefaults.standard.data(forKey: key) else {
             return SalaryConfig()
         }
-        return cfg
+        do {
+            let cfg = try JSONDecoder().decode(SalaryConfig.self, from: data)
+            // 兼容旧版本：解码成功后立即回写一次，补齐新增字段
+            save(cfg)
+            return cfg
+        } catch {
+            // 极端情况（字段类型不兼容）：保留原文件备份，避免静默丢配置
+            let backup = data.base64EncodedString().prefix(4000)
+            UserDefaults.standard.set(String(backup), forKey: "xintiao.config.backup")
+            return SalaryConfig()
+        }
     }
     static func save(_ cfg: SalaryConfig) {
         if isEphemeral { return }
         if let data = try? JSONEncoder().encode(cfg) {
             UserDefaults.standard.set(data, forKey: key)
+            UserDefaults.standard.synchronize()
         }
     }
 }

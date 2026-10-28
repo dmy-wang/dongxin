@@ -7,6 +7,11 @@ import SwiftUI
 struct XinTiaoMain {
     @MainActor
     static func main() {
+        if CommandLine.arguments.contains("--print-config") {
+            let c = Store.load()
+            print("monthlySalary=\(c.monthlySalary) start=\(c.startHour):\(c.startMinute) end=\(c.endHour):\(c.endMinute) lunch=\(c.lunchMinutes) zoom=\(c.zoom) symbol=\(c.symbolStyle.rawValue) mode=\(c.displayMode.rawValue)")
+            exit(0)
+        }
         if CommandLine.arguments.contains("--selftest") {
             exit(SelfTest.run())
         }
